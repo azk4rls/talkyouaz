@@ -39,6 +39,7 @@ func main() {
 	r.Route("/api/v1/auth", func(r chi.Router) {
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
+		r.Post("/verify", authHandler.Verify)
 
 		// Rute placeholder untuk login sosial
 		r.Get("/google/login", authHandler.GoogleLogin)

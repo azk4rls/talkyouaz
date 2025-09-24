@@ -32,7 +32,7 @@
                 <form id="register-form">
                     <input type="text" id="register-name" placeholder="Nama Lengkap" required>
                     <input type="email" id="register-email" placeholder="Email" required>
-                    <input type="password" id="register-password" placeholder="Password (min. 8 karakter)" required>
+                    <input type="password" id="register-password" placeholder="Password" required>
                     <button type="submit">Lanjutkan</button>
                 </form>
                 <p class="switch-view">Sudah punya akun? <a href="#" id="show-login">Login di sini</a></p>
@@ -42,10 +42,10 @@
         <div id="otp-view" style="display: none;">
             <div class="form-container">
                 <h1>Verifikasi Akun Anda</h1>
-                <p>Kami telah mengirimkan 6 digit kode ke <strong id="otp-email-display">email@anda.com</strong>. Silakan periksa.</p>
+                <p>Kami telah mengirimkan kode 6 digit ke <strong id="otp-email-display">email@anda.com</strong>. Silakan masukkan di bawah.</p>
                 <form id="otp-form">
-                    <input type="text" id="otp-code" placeholder="Masukkan 6 digit kode OTP" required maxlength="6">
-                    <button type="submit">Verifikasi</button>
+                    <input type="text" id="otp-code" placeholder="XXXXXX" required maxlength="6">
+                    <button type="submit">Verifikasi & Selesaikan</button>
                 </form>
                 <p class="switch-view"><a href="#" id="resend-otp">Kirim ulang kode</a></p>
             </div>

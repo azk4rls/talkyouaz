@@ -122,3 +122,55 @@ func (h *AuthHandler) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	// 6. Kirim token JWT ke client.
 	json.NewEncoder(w).Encode(map[string]string{"message": "Placeholder untuk callback Google"})
 }
+
+type VerifyInput struct {
+	Email   string `json:"email"`
+	OtpCode string `json:"otp_code"`
+}
+
+func (h *AuthHandler) Verify(w http.ResponseWriter, r *http.Request) {
+	var input VerifyInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Request body tidak valid", http.StatusBadRequest)
+		return
+	}
+
+	// 1. Dapatkan user_id dan OTP yang benar dari DB
+	var userID int
+	var correctOtp string
+	var expiresAt time.Time
+	
+	// Query JOIN untuk mendapatkan data OTP berdasarkan email pengguna
+	stmt := `SELECT u.id, o.otp_code, o.expires_at FROM users u JOIN otps o ON u.id = o.user_id WHERE u.email = ? ORDER BY o.created_at DESC LIMIT 1`
+	err := h.DB.QueryRow(stmt, input.Email).Scan(&userID, &correctOtp, &expiresAt)
+	if err != nil {
+		http.Error(w, "Email tidak ditemukan atau tidak ada permintaan OTP", http.StatusNotFound)
+		return
+	}
+
+	// 2. Cek apakah OTP sudah kedaluwarsa
+	if time.Now().After(expiresAt) {
+		http.Error(w, "Kode OTP telah kedaluwarsa", http.StatusBadRequest)
+		return
+	}
+
+	// 3. Cek apakah OTP cocok
+	if input.OtpCode != correctOtp {
+		http.Error(w, "Kode OTP salah", http.StatusBadRequest)
+		return
+	}
+
+	// 4. Jika cocok, update status verifikasi user
+	updateStmt := `UPDATE users SET is_email_verified = TRUE WHERE id = ?`
+	_, err = h.DB.Exec(updateStmt, userID)
+	if err != nil {
+		http.Error(w, "Gagal memverifikasi akun", http.StatusInternalServerError)
+		return
+	}
+	
+	// (Opsional: hapus OTP yang sudah digunakan dari tabel otps)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Verifikasi berhasil"})
+}
