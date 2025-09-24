@@ -16,10 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
         showLogin: document.getElementById('show-login'),
         resendOtp: document.getElementById('resend-otp')
     };
+    const socialButtons = {
+        googleLogin: document.getElementById('login-google-btn'),
+        appleLogin: document.getElementById('login-apple-btn'),
+        facebookLogin: document.getElementById('login-facebook-btn')
+    };
     const logoutButton = document.getElementById('logout-button');
     const otpEmailDisplay = document.getElementById('otp-email-display');
 
-    // Variabel untuk menyimpan email sementara saat verifikasi
     let emailForVerification = '';
 
     // === Fungsi untuk pindah antar view ===
@@ -33,15 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
     links.showLogin.addEventListener('click', (e) => { e.preventDefault(); switchView('login'); });
     links.resendOtp.addEventListener('click', (e) => {
         e.preventDefault();
-        // (Logika untuk kirim ulang OTP bisa ditambahkan di sini)
         alert('Fitur kirim ulang OTP belum diimplementasikan.');
     });
 
     // === LOGIKA UTAMA: Registrasi, Verifikasi, Login, Logout ===
 
-    // 1. Registrasi
     forms.register.addEventListener('submit', async (e) => {
         e.preventDefault();
+        // ... (Logika Registrasi)
         const name = document.getElementById('register-name').value;
         const email = document.getElementById('register-email').value;
         const password = document.getElementById('register-password').value;
@@ -52,63 +55,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password })
             });
-
             if (!response.ok) throw new Error('Registrasi gagal. Email mungkin sudah terdaftar.');
             
-            // Simpan email untuk proses verifikasi
             emailForVerification = email;
-            otpEmailDisplay.textContent = email; // Tampilkan email di halaman OTP
+            otpEmailDisplay.textContent = email;
             
             alert('Registrasi tahap 1 berhasil! Silakan cek email Anda untuk kode OTP.');
-            switchView('otp'); // Pindah ke halaman verifikasi OTP
+            switchView('otp');
         } catch (error) {
             alert(error.message);
         }
     });
 
-    // 2. Verifikasi OTP
     forms.otp.addEventListener('submit', async (e) => {
         e.preventDefault();
+        // ... (Logika Verifikasi OTP)
         const otp_code = document.getElementById('otp-code').value;
-
         if (!emailForVerification) {
             alert('Terjadi kesalahan. Silakan coba registrasi ulang.');
             switchView('register');
             return;
         }
-
         try {
-            // Kita akan buat endpoint ini di backend nanti
             const response = await fetch('/api/v1/auth/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: emailForVerification, otp_code })
             });
-
             if (!response.ok) throw new Error('Kode OTP salah atau telah kedaluwarsa.');
 
             alert('Verifikasi berhasil! Silakan login untuk melanjutkan.');
-            forms.login.reset(); // Bersihkan form login
-            document.getElementById('login-email').value = emailForVerification; // Isi email otomatis
-            switchView('login'); // Pindah ke halaman login
+            forms.login.reset();
+            document.getElementById('login-email').value = emailForVerification;
+            switchView('login');
         } catch (error) {
             alert(error.message);
         }
     });
 
-    // 3. Login
     forms.login.addEventListener('submit', async (e) => {
         e.preventDefault();
+        // ... (Logika Login)
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
-
         try {
             const response = await fetch('/api/v1/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
-            
             if (!response.ok) throw new Error('Email atau password salah.');
 
             const data = await response.json();
@@ -120,13 +115,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // 4. Logout
     logoutButton.addEventListener('click', () => {
         localStorage.removeItem('authToken');
         alert('Anda telah logout.');
         switchView('login');
     });
     
+    // === Event Listeners untuk Tombol Sosial ===
+    socialButtons.googleLogin.addEventListener('click', () => {
+        window.location.href = '/api/v1/auth/google/login';
+    });
+    socialButtons.appleLogin.addEventListener('click', () => {
+        alert('Login dengan Apple belum diimplementasikan.');
+    });
+    socialButtons.facebookLogin.addEventListener('click', () => {
+        alert('Login dengan Facebook belum diimplementasikan.');
+    });
+
     // --- Inisialisasi Aplikasi ---
     const token = localStorage.getItem('authToken');
     if (token) {
