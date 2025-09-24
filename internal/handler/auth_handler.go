@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+	"math/rand"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"talkyou/internal/model"
+	"talkyou/internal/util"
 )
 
 // Catatan: JWT_SECRET harus diambil dari environment variable di produksi
@@ -173,4 +175,60 @@ func (h *AuthHandler) Verify(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Verifikasi berhasil"})
+}
+
+func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	var input RegisterInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Request body tidak valid", http.StatusBadRequest)
+		return
+	}
+
+	// (Validasi input lainnya di sini)
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, "Gagal memproses password", http.StatusInternalServerError)
+		return
+	}
+
+	// 1. Simpan user dengan status belum terverifikasi
+	stmt := `INSERT INTO users (name, email, hashed_password, is_email_verified) VALUES (?, ?, ?, ?)`
+	result, err := h.DB.Exec(stmt, input.Name, input.Email, string(hashedPassword), false)
+	if err != nil {
+		http.Error(w, "Gagal mendaftarkan pengguna (email mungkin sudah ada)", http.StatusInternalServerError)
+		return
+	}
+	
+	userID, err := result.LastInsertId()
+	if err != nil {
+		http.Error(w, "Gagal mendapatkan ID pengguna", http.StatusInternalServerError)
+		return
+	}
+
+	// 2. Generate kode OTP 6 digit
+	otpCode := fmt.Sprintf("%06d", rand.Intn(1000000))
+	expiresAt := time.Now().Add(5 * time.Minute)
+
+	// 3. Simpan OTP ke database
+	otpStmt := `INSERT INTO otps (user_id, otp_code, expires_at) VALUES (?, ?, ?)`
+	_, err = h.DB.Exec(otpStmt, userID, otpCode, expiresAt)
+	if err != nil {
+		http.Error(w, "Gagal menyimpan OTP", http.StatusInternalServerError)
+		return
+	}
+	
+	// 4. KIRIM EMAIL OTP!
+	err = util.SendEmailOTP(input.Email, otpCode)
+	if err != nil {
+		log.Printf("Gagal mengirim email OTP ke %s: %v", input.Email, err)
+		// Kirim respons error, tapi jangan sampai membocorkan detail error internal
+		http.Error(w, "Gagal mengirim email verifikasi", http.StatusInternalServerError)
+		return
+	}
+
+	// 5. Kirim respons sukses ke frontend
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Registrasi berhasil, silakan cek email untuk kode verifikasi."})
 }
