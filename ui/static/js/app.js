@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const socialButtons = {
         googleLogin: document.getElementById('login-google-btn'),
-        appleLogin: document.getElementById('login-apple-btn'),
         facebookLogin: document.getElementById('login-facebook-btn')
     };
     const logoutButton = document.getElementById('logout-button');
@@ -56,13 +55,16 @@ document.addEventListener('DOMContentLoaded', () => {
     links.showLogin.addEventListener('click', (e) => { e.preventDefault(); switchView('login'); });
     
     // Event listener untuk tombol sosial
-    socialButtons.googleLogin.addEventListener('click', () => {
-        window.location.href = '/api/v1/auth/google/login';
-    });
-    socialButtons.appleLogin.addEventListener('click', () => { alert('Login dengan Apple belum diimplementasikan.'); });
-    socialButtons.facebookLogin.addEventListener('click', () => {
-        window.location.href = '/api/v1/auth/facebook/login';
-    });
+    if (socialButtons.googleLogin) {
+        socialButtons.googleLogin.addEventListener('click', () => {
+            window.location.href = '/api/v1/auth/google/login';
+        });
+    }
+    if (socialButtons.facebookLogin) {
+        socialButtons.facebookLogin.addEventListener('click', () => {
+            window.location.href = '/api/v1/auth/facebook/login';
+        });
+    }
 
 
     // --- LOGIKA FORM ---
@@ -128,22 +130,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({ email, password })
                 });
                 if (!response.ok) {
-                    const errorData = await response.json();
+                    const contentType = response.headers.get('content-type') || '';
+                    const errorBody = contentType.includes('application/json') ? (await response.json()) : { message: await response.text() };
                     if (response.status === 403) {
                         emailForVerification = email;
                         if(otpEmailDisplay) otpEmailDisplay.textContent = email;
-                        alert("Akun belum diverifikasi. Silakan masukkan kode OTP yang telah dikirim.");
+                        alert('Akun belum diverifikasi. Silakan masukkan kode OTP yang telah dikirim.');
                         switchView('otp');
                     } else {
-                        throw new Error('Email atau password salah.');
+                        alert(errorBody.message || 'Email atau password salah.');
                     }
                     return;
                 }
                 const data = await response.json();
-                localStorage.setItem('authToken', data.token);
-                switchView('dashboard');
+                if (data && data.token) {
+                    localStorage.setItem('authToken', data.token);
+                    switchView('dashboard');
+                } else {
+                    console.error('Unexpected login response', data);
+                    alert('Login gagal: respons tidak valid dari server.');
+                }
             } catch(error) {
-                alert(error.message);
+                console.error('Login error', error);
+                alert(error.message || 'Terjadi kesalahan saat login.');
             }
         });
     }

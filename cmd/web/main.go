@@ -82,9 +82,11 @@ func main() {
 		http.ServeFile(w, r, "./ui/html/index.html")
 	})
 
-	port := ":8080"
-	fmt.Printf("Server Talkyou berjalan di http://localhost%s\n", port)
-	if err := http.ListenAndServe(port, r); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" { port = "8080" }
+	addr := ":" + port
+	fmt.Printf("Server Talkyou berjalan di http://localhost:%s\n", port)
+	if err := http.ListenAndServe(addr, r); err != nil {
 		log.Fatalf("Gagal menjalankan server: %v", err)
 	}
 }
