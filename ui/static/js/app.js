@@ -13,22 +13,18 @@ function switchView(viewName) {
 }
 
 // Fungsi untuk menangani callback dari login sosial
-// Dijalankan segera saat script dimuat
 const handleAuthCallback = () => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
 
     if (token) {
-        // Simpan token ke localStorage
         localStorage.setItem('authToken', token);
-        // Hapus token dari URL agar bersih dan tidak terbaca lagi
         window.history.replaceState({}, document.title, "/");
-        // Langsung tampilkan dashboard
         switchView('dashboard');
     }
 };
 
-// Panggil fungsi callback segera
+// Panggil fungsi callback segera saat script dimuat
 handleAuthCallback();
 
 
@@ -64,12 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/api/v1/auth/google/login';
     });
     socialButtons.appleLogin.addEventListener('click', () => { alert('Login dengan Apple belum diimplementasikan.'); });
-    socialButtons.facebookLogin.addEventListener('click', () => { alert('Login dengan Facebook belum diimplementasikan.'); });
+    socialButtons.facebookLogin.addEventListener('click', () => {
+        window.location.href = '/api/v1/auth/facebook/login';
+    });
 
 
     // --- LOGIKA FORM ---
-
-    // 1. Registrasi
     if (forms.register) {
         forms.register.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -93,14 +89,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Verifikasi OTP
     if (forms.otp) {
         forms.otp.addEventListener('submit', async (e) => {
-            // ... Logika OTP Anda ...
+            e.preventDefault();
+            const otp_code = document.getElementById('otp-code').value;
+            if (!emailForVerification) {
+                alert('Terjadi kesalahan. Silakan coba registrasi ulang.');
+                switchView('register');
+                return;
+            }
+            try {
+                const response = await fetch('/api/v1/auth/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailForVerification, otp_code })
+                });
+                if (!response.ok) throw new Error('Kode OTP salah atau telah kedaluwarsa.');
+
+                alert('Verifikasi berhasil! Silakan login untuk melanjutkan.');
+                forms.login.reset();
+                document.getElementById('login-email').value = emailForVerification;
+                switchView('login');
+            } catch (error) {
+                alert(error.message);
+            }
         });
     }
 
-    // 3. Login
     if (forms.login) {
         forms.login.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -114,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 if (!response.ok) {
                     const errorData = await response.json();
-                     // Cek apakah error karena belum verifikasi
                     if (response.status === 403) {
                         emailForVerification = email;
                         if(otpEmailDisplay) otpEmailDisplay.textContent = email;
@@ -125,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     return;
                 }
-
                 const data = await response.json();
                 localStorage.setItem('authToken', data.token);
                 switchView('dashboard');
@@ -135,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // 4. Logout
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('authToken');
@@ -145,9 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // --- Inisialisasi Aplikasi ---
-    // Cek jika user sudah login (token sudah ada tapi tidak dari callback)
     const token = localStorage.getItem('authToken');
-    // URLSearchParams akan kosong jika tidak ada token dari callback
     const params = new URLSearchParams(window.location.search);
 
     if (token && !params.has('token')) {

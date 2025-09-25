@@ -11,7 +11,6 @@ import (
 	"math/big"
 	mathrand "math/rand"
 	"net/http"
-	"os"
 	"talkyou/internal/model"
 	"talkyou/internal/util"
 	"time"
@@ -19,33 +18,25 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	googleOAuth2 "google.golang.org/api/oauth2/v2"
 	"google.golang.org/api/option"
 )
 
-var JWT_SECRET = []byte(os.Getenv("JWT_SECRET"))
-var googleOAuthConfig *oauth2.Config
-
-func init() {
-	mathrand.New(mathrand.NewSource(time.Now().UnixNano()))
-	googleOAuthConfig = &oauth2.Config{
-		RedirectURL:  os.Getenv("GOOGLE_OAUTH_REDIRECT_URL"),
-		ClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
-		ClientSecret: os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
-		Endpoint:     google.Endpoint,
-	}
-}
+// --- Konfigurasi dan Variabel ---
+func init() { mathrand.New(mathrand.NewSource(time.Now().UnixNano())) }
 
 type AuthHandler struct {
-	DB          *sql.DB
-	OAuthConfig *oauth2.Config
+	DB             *sql.DB
+	GoogleConfig   *oauth2.Config
+	FacebookConfig *oauth2.Config
+	JWTSecret      []byte
 }
 
 type RegisterInput struct { Name string `json:"name"`; Email string `json:"email"`; Password string `json:"password"` }
 type LoginInput struct { Email string `json:"email"`; Password string `json:"password"` }
 type VerifyInput struct { Email string `json:"email"`; OtpCode string `json:"otp_code"` }
+
+// --- Handler Otentikasi Email/Password & OTP ---
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var input RegisterInput
@@ -120,7 +111,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		"exp":     time.Now().Add(time.Hour * 72).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(JWT_SECRET)
+	tokenString, err := token.SignedString(h.JWTSecret)
 	if err != nil {
 		http.Error(w, "Gagal membuat token", http.StatusInternalServerError)
 		return
@@ -165,16 +156,15 @@ func (h *AuthHandler) Verify(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"message": "Verifikasi berhasil"})
 }
 
+// --- Handler untuk Login Sosial ---
+var oauthStateString string
+
 func (h *AuthHandler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
 	b := make([]byte, 16)
 	rand.Read(b)
-	oauthStateString := base64.URLEncoding.EncodeToString(b)
-	http.SetCookie(w, &http.Cookie{
-		Name:    "oauthstate",
-		Value:   oauthStateString,
-		Expires: time.Now().Add(10 * time.Minute),
-	})
-	url := h.OAuthConfig.AuthCodeURL(oauthStateString)
+	oauthStateString = base64.URLEncoding.EncodeToString(b)
+	http.SetCookie(w, &http.Cookie{Name: "oauthstate", Value: oauthStateString, Expires: time.Now().Add(10 * time.Minute)})
+	url := h.GoogleConfig.AuthCodeURL(oauthStateString)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
@@ -186,13 +176,13 @@ func (h *AuthHandler) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	code := r.FormValue("code")
-	token, err := h.OAuthConfig.Exchange(context.Background(), code)
+	token, err := h.GoogleConfig.Exchange(context.Background(), code)
 	if err != nil {
 		log.Printf("Code exchange failed: %s\n", err.Error())
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	oauth2Service, err := googleOAuth2.NewService(context.Background(), option.WithTokenSource(h.OAuthConfig.TokenSource(context.Background(), token)))
+	oauth2Service, err := googleOAuth2.NewService(context.Background(), option.WithTokenSource(h.GoogleConfig.TokenSource(context.Background(), token)))
 	if err != nil {
 		log.Printf("Failed to create oauth2 service: %s", err.Error())
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -228,7 +218,72 @@ func (h *AuthHandler) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 		"exp":     time.Now().Add(time.Hour * 72).Unix(),
 	}
 	appToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	appTokenString, _ := appToken.SignedString(JWT_SECRET)
+	appTokenString, _ := appToken.SignedString(h.JWTSecret)
+	redirectURL := fmt.Sprintf("/auth/callback?token=%s", appTokenString)
+	http.Redirect(w, r, redirectURL, http.StatusTemporaryRedirect)
+}
+
+func (h *AuthHandler) FacebookLogin(w http.ResponseWriter, r *http.Request) {
+	b := make([]byte, 16)
+	rand.Read(b)
+	oauthStateString = base64.URLEncoding.EncodeToString(b)
+	http.SetCookie(w, &http.Cookie{Name: "oauthstate", Value: oauthStateString, Expires: time.Now().Add(10 * time.Minute)})
+	url := h.FacebookConfig.AuthCodeURL(oauthStateString)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func (h *AuthHandler) FacebookCallback(w http.ResponseWriter, r *http.Request) {
+	oauthState, _ := r.Cookie("oauthstate")
+	if r.FormValue("state") != oauthState.Value {
+		log.Println("Invalid oauth facebook state")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	code := r.FormValue("code")
+	token, err := h.FacebookConfig.Exchange(context.Background(), code)
+	if err != nil {
+		log.Printf("Facebook code exchange failed: %s\n", err.Error())
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	fbResp, err := http.Get("https://graph.facebook.com/me?fields=id,name,email&access_token=" + token.AccessToken)
+	if err != nil {
+		log.Printf("Failed to get user info from Facebook: %s\n", err.Error())
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	defer fbResp.Body.Close()
+	var fbUser struct { ID string `json:"id"`; Name string `json:"name"`; Email string `json:"email"` }
+	if err := json.NewDecoder(fbResp.Body).Decode(&fbUser); err != nil {
+		log.Printf("Failed to decode user info from Facebook: %s\n", err.Error())
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	var user model.User
+	err = h.DB.QueryRow("SELECT id, name, email FROM users WHERE email = ?", fbUser.Email).Scan(&user.ID, &user.Name, &user.Email)
+	if err == sql.ErrNoRows {
+		n, _ := rand.Int(rand.Reader, big.NewInt(100000000))
+		randomPassword := fmt.Sprintf("social_login_%d", n)
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(randomPassword), bcrypt.DefaultCost)
+		stmt := "INSERT INTO users (name, email, hashed_password, is_email_verified) VALUES (?, ?, ?, ?)"
+		result, dbErr := h.DB.Exec(stmt, fbUser.Name, fbUser.Email, string(hashedPassword), true)
+		if dbErr != nil {
+			http.Error(w, "Gagal membuat akun", http.StatusInternalServerError)
+			return
+		}
+		newID, _ := result.LastInsertId()
+		user.ID = int(newID)
+	} else if err != nil {
+		http.Error(w, "Terjadi kesalahan database", http.StatusInternalServerError)
+		return
+	}
+	claims := jwt.MapClaims{
+		"user_id": user.ID,
+		"name":    fbUser.Name,
+		"exp":     time.Now().Add(time.Hour * 72).Unix(),
+	}
+	appToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	appTokenString, _ := appToken.SignedString(h.JWTSecret)
 	redirectURL := fmt.Sprintf("/auth/callback?token=%s", appTokenString)
 	http.Redirect(w, r, redirectURL, http.StatusTemporaryRedirect)
 }
