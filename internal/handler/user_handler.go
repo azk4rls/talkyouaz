@@ -3,7 +3,9 @@ package handler
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
+	"talkyou/internal/model"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -12,63 +14,97 @@ type UserHandler struct {
 	DB *sql.DB
 }
 
+// Struct untuk input saat update profil
+type UpdateProfileInput struct {
+	Name        string `json:"name"`
+	PhoneNumber string `json:"phone_number"`
+}
+
+// Struct untuk input saat update password
 type UpdatePasswordInput struct {
 	OldPassword string `json:"old_password"`
 	NewPassword string `json:"new_password"`
 }
 
-// GetMyProfile - Mendapatkan profil pengguna yang sedang login
 func (h *UserHandler) GetMyProfile(w http.ResponseWriter, r *http.Request) {
-	// ID pengguna diambil dari konteks setelah divalidasi oleh middleware JWT
 	userID := r.Context().Value("userID").(int)
 
-	// Ambil data user dari DB berdasarkan userID...
-	// Kirim kembali sebagai JSON (tanpa password)
+	var user model.User
+	stmt := "SELECT id, name, email, phone_number FROM users WHERE id = ?"
+	err := h.DB.QueryRow(stmt, userID).Scan(&user.ID, &user.Name, &user.Email, &user.PhoneNumber)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Pengguna tidak ditemukan", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Gagal mengambil profil", http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{"message": "Endpoint profil berhasil diakses", "user_id": userID})
+	json.NewEncoder(w).Encode(user)
 }
 
-// UpdatePassword - Memperbarui password
-func (h *UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("userID").(int)
-	var input UpdatePasswordInput
 
+	var input UpdateProfileInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, "Request body tidak valid", http.StatusBadRequest)
 		return
 	}
 
-	// 1. Ambil hashed_password saat ini dari DB
+	if input.Name == "" {
+		http.Error(w, "Nama tidak boleh kosong", http.StatusBadRequest)
+		return
+	}
+
+	var phoneValue sql.NullString
+	if input.PhoneNumber != "" {
+		phoneValue = sql.NullString{String: input.PhoneNumber, Valid: true}
+	} else {
+		phoneValue = sql.NullString{Valid: false} // Ini akan disimpan sebagai NULL
+	}
+
+	stmt := `UPDATE users SET name = ?, phone_number = ? WHERE id = ?`
+	_, err := h.DB.Exec(stmt, input.Name, phoneValue, userID)
+	if err != nil {
+		log.Printf("Gagal update profil untuk user ID %d: %v", userID, err)
+		http.Error(w, "Gagal memperbarui profil", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Profil berhasil diperbarui"})
+}
+
+func (h *UserHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value("userID").(int)
+	var input UpdatePasswordInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Request body tidak valid", http.StatusBadRequest)
+		return
+	}
 	var currentHashedPassword string
-	stmt := `SELECT hashed_password FROM users WHERE id = ?`
-	err := h.DB.QueryRow(stmt, userID).Scan(&currentHashedPassword)
+	err := h.DB.QueryRow("SELECT hashed_password FROM users WHERE id = ?", userID).Scan(&currentHashedPassword)
 	if err != nil {
 		http.Error(w, "Pengguna tidak ditemukan", http.StatusNotFound)
 		return
 	}
-
-	// 2. Verifikasi password lama
 	if err := bcrypt.CompareHashAndPassword([]byte(currentHashedPassword), []byte(input.OldPassword)); err != nil {
 		http.Error(w, "Password lama salah", http.StatusUnauthorized)
 		return
 	}
-
-	// 3. Hash password baru
 	newHashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(w, "Gagal memproses password baru", http.StatusInternalServerError)
 		return
 	}
-
-	// 4. Update password di DB
-	updateStmt := `UPDATE users SET hashed_password = ? WHERE id = ?`
-	_, err = h.DB.Exec(updateStmt, string(newHashedPassword), userID)
+	_, err = h.DB.Exec("UPDATE users SET hashed_password = ? WHERE id = ?", string(newHashedPassword), userID)
 	if err != nil {
 		http.Error(w, "Gagal memperbarui password", http.StatusInternalServerError)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Password berhasil diperbarui"})
 }

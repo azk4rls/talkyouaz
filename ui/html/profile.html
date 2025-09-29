@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil & Pengaturan - Talkyou</title>
+    
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/profile.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="layout-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>Talkyou</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/peringatan-suara" class="nav-link"><i class="fas fa-bell"></i> Peringatan Suara</a></li>
+                <li><a href="/riwayat" class="nav-link"><i class="fas fa-history"></i> Riwayat</a></li>
+                <li><a href="/profil" class="nav-link active"><i class="fas fa-user-cog"></i> Profil & Pengaturan</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="logout-button" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Profil & Pengaturan</h1>
+                <p>Kelola informasi akun dan keamanan Anda.</p>
+            </header>
+
+            <div class="settings-container">
+                <div class="tabs">
+                    <button class="tab-link active" data-tab="profil-content">
+                        <i class="fas fa-user-edit"></i> Profil
+                    </button>
+                    <button class="tab-link" data-tab="keamanan-content">
+                        <i class="fas fa-shield-alt"></i> Keamanan
+                    </button>
+                </div>
+
+                <div class="tab-content active" id="profil-content">
+                    <div class="settings-card">
+                        <h2>Informasi Profil</h2>
+                        <form id="profile-form">
+                            <div class="form-group">
+                                <label for="profile-name">Nama Lengkap</label>
+                                <input type="text" id="profile-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-email">Email</label>
+                                <input type="email" id="profile-email" disabled>
+                                <small>Email tidak dapat diubah.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-phone">No. Telepon</label>
+                                <input type="tel" id="profile-phone" placeholder="Contoh: 08123456789">
+                            </div>
+                            <button type="submit" class="save-btn">Simpan Profil</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="keamanan-content">
+                    <div class="settings-card">
+                        <h2>Ubah Password</h2>
+                        <form id="change-password-form">
+                            <div class="form-group">
+                                <label for="old-password">Password Lama</label>
+                                <input type="password" id="old-password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="new-password">Password Baru</label>
+                                <input type="password" id="new-password" required minlength="8">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-password">Konfirmasi Password Baru</label>
+                                <input type="password" id="confirm-password" required>
+                            </div>
+                            <button type="submit" class="save-btn">Simpan Password</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="/static/js/profile.js"></script>
+</body>
+</html>

@@ -75,6 +75,7 @@ func main() {
 	r.Get("/komunikasi", pageHandler.ShowKomunikasiPage)
 	r.Get("/frasa-cepat", pageHandler.ShowPhrasesPage)
 	r.Get("/riwayat", pageHandler.ShowHistoryPage)
+	r.Get("/profil", pageHandler.ShowProfilePage)
 	// r.Get("/pengaturan", pageHandler.ShowPengaturanPage)
 
 	r.Group(func(r chi.Router) {
@@ -101,10 +102,11 @@ func main() {
 	})
 
 	// --- API Terproteksi: User ---
-	r.Group(func(r chi.Router) {
+	r.Route("/api/v1/me", func(r chi.Router) {
 		r.Use(appMiddleware.JWTMiddleware)
-		r.Get("/api/v1/me", userHandler.GetMyProfile)
-		r.Put("/api/v1/me/password", userHandler.UpdatePassword)
+		r.Get("/", userHandler.GetMyProfile)
+		r.Put("/", userHandler.UpdateProfile) // <-- PASTIKAN BARIS INI ADA
+		r.Put("/password", userHandler.UpdatePassword)
 	})
 
 	// --- Static Files ---
