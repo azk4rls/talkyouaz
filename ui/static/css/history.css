@@ -1,0 +1,31 @@
+#history-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.history-item {
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    transition: box-shadow 0.2s;
+}
+.history-item:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+}
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+.history-header h3 { margin: 0; font-size: 1.2rem; }
+.history-header span { font-size: 0.9rem; color: var(--light-text-color); }
+.history-transcript {
+    white-space: pre-wrap; /* Agar format teks (enter) tetap terjaga */
+    max-height: 100px;
+    overflow: hidden;
+    color: #495057;
+}

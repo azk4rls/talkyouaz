@@ -24,6 +24,9 @@ func (h *PageHandler) ShowKomunikasiPage(w http.ResponseWriter, r *http.Request)
 func (h *PageHandler) ShowPhrasesPage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./ui/html/phrases.html")
 }
+func (h *PageHandler) ShowHistoryPage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./ui/html/history.html")
+}
 // func (h *PageHandler) ShowPengaturanPage(w http.ResponseWriter, r *http.Request) {
 // 	http.ServeFile(w, r, "./ui/html/pages/pengaturan.html")
 // }

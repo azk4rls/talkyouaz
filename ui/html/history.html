@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jembatan Komunikasi - Talkyou</title>
+    <title>Riwayat Percakapan - Talkyou</title>
+    
     <link rel="stylesheet" href="/static/css/dashboard.css"> 
-    <link rel="stylesheet" href="/static/css/komunikasi.css"> 
+    <link rel="stylesheet" href="/static/css/history.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,7 +21,7 @@
             <ul class="nav-menu">
                 <li><a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="/peringatan-suara" class="nav-link"><i class="fas fa-bell"></i> Peringatan Suara</a></li>
-                <li><a href="/riwayat" class="nav-link"><i class="fas fa-history"></i> Riwayat</a></li>
+                <li><a href="/riwayat" class="nav-link active"><i class="fas fa-history"></i> Riwayat</a></li>
                 <li><a href="/profil" class="nav-link"><i class="fas fa-user-cog"></i> Profil & Pengaturan</a></li>
             </ul>
             <div class="sidebar-footer">
@@ -32,33 +33,14 @@
 
         <main class="main-content">
             <header class="main-header">
-                <div class="header-text">
-                    <h1>Jembatan Komunikasi</h1>
-                    <p>Mulai percakapan dua arah dengan mengetik atau berbicara.</p>
-                </div>
+                <h1>Riwayat Percakapan</h1>
+                <p>Lihat kembali percakapan yang telah Anda simpan.</p>
             </header>
-
-            <div class="komunikasi-container">
-                <div id="transcript-area" class="transcript-area">
-                    </div>
-        
-                <div class="status-bar">
-                    <div id="status-indicator" class="status-idle"></div>
-                    <span id="status-text">Siap</span>
-                </div>
-        
-                <div class="controls-area">
-                    <textarea id="user-text-input" placeholder="Ketik pesan Anda di sini..."></textarea>
-                    <div class="button-group">
-                        <button id="speak-btn" class="action-btn"><i class="fas fa-volume-up"></i> Ucapkan</button>
-                        <button id="listen-btn" class="action-btn"><i class="fas fa-microphone"></i> Mendengar</button>
-                        <button id="save-btn" class="action-btn save"><i class="fas fa-save"></i> Simpan</button>
-                    </div>
-                </div>
+            <div id="history-list-container" class="history-list-container">
+                <p class="loading-text">Memuat riwayat...</p>
             </div>
         </main>
     </div>
-
-    <script src="/static/js/komunikasi.js"></script>
+    <script src="/static/js/history.js"></script>
 </body>
 </html>

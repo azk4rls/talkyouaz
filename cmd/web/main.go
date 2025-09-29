@@ -64,6 +64,7 @@ func main() {
 	}
 	userHandler := &handler.UserHandler{DB: db}
 	pageHandler := &handler.PageHandler{}
+	conversationHandler := &handler.ConversationHandler{DB: db}
 
 	// ================== ROUTES ==================
 
@@ -73,7 +74,15 @@ func main() {
 	r.Get("/dashboard", pageHandler.ShowDashboardPage)
 	r.Get("/komunikasi", pageHandler.ShowKomunikasiPage)
 	r.Get("/frasa-cepat", pageHandler.ShowPhrasesPage)
+	r.Get("/riwayat", pageHandler.ShowHistoryPage)
 	// r.Get("/pengaturan", pageHandler.ShowPengaturanPage)
+
+	r.Group(func(r chi.Router) {
+	r.Use(appMiddleware.JWTMiddleware)
+    r.Get("/api/v1/conversations", conversationHandler.GetAllConversations)
+    r.Post("/api/v1/conversations", conversationHandler.SaveConversation)
+    r.Delete("/api/v1/conversations/{id}", conversationHandler.DeleteConversation)
+	})
 
 
 	// --- API Publik: Auth ---

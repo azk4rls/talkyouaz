@@ -93,3 +93,37 @@ document.addEventListener('DOMContentLoaded', () => {
         listenBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Browser Tidak Mendukung';
     }
 });
+
+const saveBtn = document.getElementById('save-btn');
+
+if (saveBtn) {
+    saveBtn.addEventListener('click', async () => {
+        const entries = transcriptArea.querySelectorAll('.transcript-entry');
+        if (entries.length === 0) {
+            alert('Tidak ada percakapan untuk disimpan.');
+            return;
+        }
+
+        let fullTranscript = [];
+        entries.forEach(entry => {
+            const prefix = entry.classList.contains('user') ? 'Saya: ' : 'Lawan Bicara: ';
+            fullTranscript.push(prefix + entry.textContent);
+        });
+
+        const response = await fetch('/api/v1/conversations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ transcript: fullTranscript.join('\n') })
+        });
+        
+        if (response.ok) {
+            alert('Percakapan berhasil disimpan!');
+            transcriptArea.innerHTML = ''; // Kosongkan transkrip setelah disimpan
+        } else {
+            alert('Gagal menyimpan percakapan.');
+        }
+    });
+}
