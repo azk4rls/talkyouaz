@@ -72,6 +72,7 @@ func main() {
 	r.Get("/auth/callback", pageHandler.ShowAuthPage)
 	r.Get("/dashboard", pageHandler.ShowDashboardPage)
 	r.Get("/komunikasi", pageHandler.ShowKomunikasiPage)
+	r.Get("/frasa-cepat", pageHandler.ShowPhrasesPage)
 	// r.Get("/pengaturan", pageHandler.ShowPengaturanPage)
 
 
