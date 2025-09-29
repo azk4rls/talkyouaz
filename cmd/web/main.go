@@ -71,6 +71,9 @@ func main() {
 	r.Get("/", pageHandler.ShowAuthPage)
 	r.Get("/auth/callback", pageHandler.ShowAuthPage)
 	r.Get("/dashboard", pageHandler.ShowDashboardPage)
+	r.Get("/komunikasi", pageHandler.ShowKomunikasiPage)
+	// r.Get("/pengaturan", pageHandler.ShowPengaturanPage)
+
 
 	// --- API Publik: Auth ---
 	r.Route("/api/v1/auth", func(r chi.Router) {

@@ -1,0 +1,107 @@
+.komunikasi-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #dee2e6;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 180px); /* Kalkulasi tinggi agar pas di layar */
+    max-height: 700px;
+}
+
+.transcript-area {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.transcript-entry {
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 80%;
+    word-wrap: break-word;
+    font-size: 1rem;
+}
+.transcript-entry.user {
+    background-color: var(--primary-color);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+.transcript-entry.interlocutor {
+    background-color: #E9ECEF;
+    color: var(--text-color);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.status-bar {
+    display: flex;
+    align-items: center;
+    padding: 8px 20px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    color: var(--light-text-color);
+    font-size: 14px;
+}
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+    transition: background-color 0.3s;
+}
+.status-idle { background-color: #6c757d; }
+.status-listening { background-color: #dc3545; animation: pulse 1.5s infinite; }
+.status-speaking { background-color: #28a745; }
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+.controls-area {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+textarea#user-text-input {
+    width: 100%;
+    height: 70px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #CED4DA;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    resize: none;
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.action-btn {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 500;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.action-btn:hover { background-color: #0056b3; }

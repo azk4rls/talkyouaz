@@ -19,3 +19,10 @@ func (h *PageHandler) ShowAuthPage(w http.ResponseWriter, r *http.Request) {
 func (h *PageHandler) ShowDashboardPage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./ui/html/dashboard.html")
 }
+
+func (h *PageHandler) ShowKomunikasiPage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./ui/html/komunikasi.html")
+}
+// func (h *PageHandler) ShowPengaturanPage(w http.ResponseWriter, r *http.Request) {
+// 	http.ServeFile(w, r, "./ui/html/pages/pengaturan.html")
+// }
