@@ -19,10 +19,12 @@ import (
 )
 
 func main() {
+	// Load .env
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error memuat file .env")
 	}
 
+	// Koneksi DB
 	db, err := openDB()
 	if err != nil {
 		log.Fatalf("Gagal terhubung ke database: %v", err)
@@ -30,6 +32,7 @@ func main() {
 	defer db.Close()
 	log.Println("Berhasil terhubung ke database!")
 
+	// Konfigurasi OAuth Google
 	googleOAuthConfig := &oauth2.Config{
 		RedirectURL:  os.Getenv("GOOGLE_OAUTH_REDIRECT_URL"),
 		ClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
@@ -38,6 +41,7 @@ func main() {
 		Endpoint:     google.Endpoint,
 	}
 
+	// Konfigurasi OAuth Facebook
 	facebookOAuthConfig := &oauth2.Config{
 		RedirectURL:  os.Getenv("FACEBOOK_OAUTH_REDIRECT_URL"),
 		ClientID:     os.Getenv("FACEBOOK_OAUTH_CLIENT_ID"),
@@ -46,51 +50,73 @@ func main() {
 		Endpoint:     facebook.Endpoint,
 	}
 
+	// Router
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	authHandler := &handler.AuthHandler{DB: db, GoogleConfig: googleOAuthConfig, FacebookConfig: facebookOAuthConfig, JWTSecret: []byte(os.Getenv("JWT_SECRET"))}
+	// Inisialisasi Handler
+	authHandler := &handler.AuthHandler{
+		DB:             db,
+		GoogleConfig:   googleOAuthConfig,
+		FacebookConfig: facebookOAuthConfig,
+		JWTSecret:      []byte(os.Getenv("JWT_SECRET")),
+	}
 	userHandler := &handler.UserHandler{DB: db}
+	pageHandler := &handler.PageHandler{}
 
-	// --- Rute Publik ---
+	// ================== ROUTES ==================
+
+	// --- Halaman Frontend ---
+	r.Get("/", pageHandler.ShowAuthPage)
+	r.Get("/auth/callback", pageHandler.ShowAuthPage)
+	r.Get("/dashboard", pageHandler.ShowDashboardPage)
+
+	// --- API Publik: Auth ---
 	r.Route("/api/v1/auth", func(r chi.Router) {
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
 		r.Post("/verify", authHandler.Verify)
-		
-		// Rute Google
+
+		// OAuth Google
 		r.Get("/google/login", authHandler.GoogleLogin)
 		r.Get("/google/callback", authHandler.GoogleCallback)
 
-		// Rute Facebook
+		// OAuth Facebook
 		r.Get("/facebook/login", authHandler.FacebookLogin)
 		r.Get("/facebook/callback", authHandler.FacebookCallback)
 	})
 
-	// --- Rute Terproteksi ---
+	// --- API Terproteksi: User ---
 	r.Group(func(r chi.Router) {
 		r.Use(appMiddleware.JWTMiddleware)
 		r.Get("/api/v1/me", userHandler.GetMyProfile)
 		r.Put("/api/v1/me/password", userHandler.UpdatePassword)
 	})
 
-	// --- Rute Frontend ---
+	// --- Static Files ---
 	fs := http.FileServer(http.Dir("./ui/static"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
+
+	// --- Catch-All ke Frontend ---
 	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./ui/html/index.html")
 	})
 
+	// ================== START SERVER ==================
 	port := os.Getenv("PORT")
-	if port == "" { port = "8080" }
+	if port == "" {
+		port = "8080"
+	}
 	addr := ":" + port
 	fmt.Printf("Server Talkyou berjalan di http://localhost:%s\n", port)
+
 	if err := http.ListenAndServe(addr, r); err != nil {
 		log.Fatalf("Gagal menjalankan server: %v", err)
 	}
 }
 
+// Koneksi Database
 func openDB() (*sql.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(localhost:3306)/%s?parseTime=true",
 		os.Getenv("DB_USER"),
@@ -98,7 +124,11 @@ func openDB() (*sql.DB, error) {
 		os.Getenv("DB_NAME"),
 	)
 	db, err := sql.Open("mysql", dsn)
-	if err != nil { return nil, err }
-	if err = db.Ping(); err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
 	return db, nil
 }

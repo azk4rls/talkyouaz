@@ -1,18 +1,19 @@
-// Fungsi untuk pindah antar view, didefinisikan secara global agar bisa diakses di mana saja
+// Fungsi untuk pindah antar view (login, register, otp)
 function switchView(viewName) {
     const views = {
         login: document.getElementById('login-view'),
         register: document.getElementById('register-view'),
-        otp: document.getElementById('otp-view'),
-        dashboard: document.getElementById('dashboard-view')
+        otp: document.getElementById('otp-view')
     };
-    Object.values(views).forEach(view => view.style.display = 'none');
+    Object.values(views).forEach(view => {
+        if (view) view.style.display = 'none';
+    });
     if (views[viewName]) {
         views[viewName].style.display = 'block';
     }
 }
 
-// Fungsi untuk menangani callback dari login sosial
+// Fungsi untuk menangani callback dari login sosial (Google / Facebook)
 const handleAuthCallback = () => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
@@ -20,17 +21,15 @@ const handleAuthCallback = () => {
     if (token) {
         localStorage.setItem('authToken', token);
         window.history.replaceState({}, document.title, "/");
-        switchView('dashboard');
+        window.location.href = "/dashboard"; // redirect ke dashboard.html
     }
 };
 
 // Panggil fungsi callback segera saat script dimuat
 handleAuthCallback();
 
-
 // Jalankan sisa script setelah DOM siap
 document.addEventListener('DOMContentLoaded', () => {
-    // Ambil semua elemen form, link, dan tombol
     const forms = {
         login: document.getElementById('login-form'),
         register: document.getElementById('register-form'),
@@ -43,18 +42,30 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const socialButtons = {
         googleLogin: document.getElementById('login-google-btn'),
-        facebookLogin: document.getElementById('login-facebook-btn')
+        facebookLogin: document.getElementById('login-facebook-btn'),
+        googleRegister: document.getElementById('register-google-btn'),
+        facebookRegister: document.getElementById('register-facebook-btn')
     };
     const logoutButton = document.getElementById('logout-button');
     const otpEmailDisplay = document.getElementById('otp-email-display');
 
     let emailForVerification = '';
 
-    // Event Listeners untuk Link Pindah View
-    links.showRegister.addEventListener('click', (e) => { e.preventDefault(); switchView('register'); });
-    links.showLogin.addEventListener('click', (e) => { e.preventDefault(); switchView('login'); });
-    
-    // Event listener untuk tombol sosial
+    // --- Link untuk pindah view ---
+    if (links.showRegister) {
+        links.showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchView('register');
+        });
+    }
+    if (links.showLogin) {
+        links.showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchView('login');
+        });
+    }
+
+    // --- Tombol login sosial ---
     if (socialButtons.googleLogin) {
         socialButtons.googleLogin.addEventListener('click', () => {
             window.location.href = '/api/v1/auth/google/login';
@@ -65,9 +76,18 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = '/api/v1/auth/facebook/login';
         });
     }
+    if (socialButtons.googleRegister) {
+        socialButtons.googleRegister.addEventListener('click', () => {
+            window.location.href = '/api/v1/auth/google/login';
+        });
+    }
+    if (socialButtons.facebookRegister) {
+        socialButtons.facebookRegister.addEventListener('click', () => {
+            window.location.href = '/api/v1/auth/facebook/login';
+        });
+    }
 
-
-    // --- LOGIKA FORM ---
+    // --- Registrasi ---
     if (forms.register) {
         forms.register.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -82,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 if (!response.ok) throw new Error('Registrasi gagal. Email mungkin sudah terdaftar.');
                 emailForVerification = email;
-                if(otpEmailDisplay) otpEmailDisplay.textContent = email;
+                if (otpEmailDisplay) otpEmailDisplay.textContent = email;
                 alert('Registrasi tahap 1 berhasil! Silakan cek email Anda untuk kode OTP.');
                 switchView('otp');
             } catch (error) {
@@ -91,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- OTP ---
     if (forms.otp) {
         forms.otp.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -118,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Login ---
     if (forms.login) {
         forms.login.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -131,10 +153,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 if (!response.ok) {
                     const contentType = response.headers.get('content-type') || '';
-                    const errorBody = contentType.includes('application/json') ? (await response.json()) : { message: await response.text() };
+                    const errorBody = contentType.includes('application/json')
+                        ? (await response.json())
+                        : { message: await response.text() };
                     if (response.status === 403) {
                         emailForVerification = email;
-                        if(otpEmailDisplay) otpEmailDisplay.textContent = email;
+                        if (otpEmailDisplay) otpEmailDisplay.textContent = email;
                         alert('Akun belum diverifikasi. Silakan masukkan kode OTP yang telah dikirim.');
                         switchView('otp');
                     } else {
@@ -145,18 +169,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 if (data && data.token) {
                     localStorage.setItem('authToken', data.token);
-                    switchView('dashboard');
+                    window.location.href = "/dashboard"; // redirect ke halaman dashboard.html
                 } else {
                     console.error('Unexpected login response', data);
                     alert('Login gagal: respons tidak valid dari server.');
                 }
-            } catch(error) {
+            } catch (error) {
                 console.error('Login error', error);
                 alert(error.message || 'Terjadi kesalahan saat login.');
             }
         });
     }
-    
+
+    // --- Logout ---
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('authToken');
@@ -164,13 +189,13 @@ document.addEventListener('DOMContentLoaded', () => {
             switchView('login');
         });
     }
-    
-    // --- Inisialisasi Aplikasi ---
+
+    // --- Inisialisasi ---
     const token = localStorage.getItem('authToken');
     const params = new URLSearchParams(window.location.search);
 
     if (token && !params.has('token')) {
-        switchView('dashboard');
+        window.location.href = '/dashboard'; // langsung ke dashboard kalau sudah login
     } else if (!token) {
         switchView('login');
     }
