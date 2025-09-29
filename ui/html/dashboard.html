@@ -11,47 +11,57 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-    <div class="dashboard-wrapper">
-        <header class="dashboard-header">
-            <h1 class="welcome-message">Selamat Datang, <span id="user-name">Pengguna</span>!</h1>
-            <button id="logout-button" class="logout-btn">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
-        </header>
+    <div class="layout-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>Talkyou</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard" class="nav-link active"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/peringatan-suara" class="nav-link"><i class="fas fa-bell"></i> Peringatan Suara</a></li>
+                <li><a href="/riwayat" class="nav-link"><i class="fas fa-history"></i> Riwayat</a></li>
+                <li><a href="/profil" class="nav-link"><i class="fas fa-user-cog"></i> Profil & Pengaturan</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="logout-button" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </nav>
 
-        <main class="feature-grid">
-            <a href="/komunikasi" class="feature-card">
-                <div class="card-icon"><i class="fas fa-comments"></i></div>
-                <h2>Jembatan Komunikasi</h2>
-                <p>Mulai percakapan dua arah secara real-time.</p>
-            </a>
-            <a href="/frasa-cepat" class="feature-card">
-                <div class="card-icon"><i class="fas fa-bolt"></i></div>
-                <h2>Frasa Cepat</h2>
-                <p>Gunakan kalimat yang sudah Anda simpan.</p>
-            </a>
-            <a href="/transkrip-live" class="feature-card">
-                <div class="card-icon"><i class="fas fa-ear-listen"></i></div>
-                <h2>Transkrip Live</h2>
-                <p>Ubah percakapan di sekitar Anda menjadi teks.</p>
-            </a>
-            <a href="/belajar" class="feature-card">
-                <div class="card-icon"><i class="fas fa-graduation-cap"></i></div>
-                <h2>Pusat Belajar</h2>
-                <p>Asah kemampuan bahasa isyarat dan tubuh.</p>
-            </a>
-            <a href="/peringatan-suara" class="feature-card">
-                <div class="card-icon"><i class="fas fa-bell"></i></div>
-                <h2>Peringatan Suara</h2>
-                <p>Dapatkan notifikasi visual untuk suara penting.</p>
-            </a>
-            <a href="/profil" class="feature-card">
-                <div class="card-icon"><i class="fas fa-user-cog"></i></div>
-                <h2>Profil & Pengaturan</h2>
-                <p>Kelola akun dan preferensi Anda.</p>
-            </a>
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-text">
+                    <h1>Selamat Datang, <span id="user-name">Pengguna</span>!</h1>
+                    <p>Pilih salah satu fitur utama di bawah ini untuk memulai.</p>
+                </div>
+            </header>
+
+            <div class="feature-grid">
+                <a href="/komunikasi" class="feature-card">
+                    <div class="card-icon"><i class="fas fa-comments"></i></div>
+                    <h2>Jembatan Komunikasi</h2>
+                    <p>Mulai percakapan dua arah secara real-time.</p>
+                </a>
+                <a href="/frasa-cepat" class="feature-card">
+                    <div class="card-icon"><i class="fas fa-bolt"></i></div>
+                    <h2>Frasa Cepat</h2>
+                    <p>Gunakan kalimat yang sudah Anda simpan.</p>
+                </a>
+                <a href="/transkrip-live" class="feature-card">
+                    <div class="card-icon"><i class="fas fa-ear-listen"></i></div>
+                    <h2>Transkrip Live</h2>
+                    <p>Ubah percakapan di sekitar Anda menjadi teks.</p>
+                </a>
+                <a href="/belajar" class="feature-card">
+                    <div class="card-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h2>Pusat Belajar</h2>
+                    <p>Asah kemampuan bahasa isyarat dan tubuh.</p>
+                </a>
+            </div>
         </main>
     </div>
+
     <script src="/static/js/dashboard.js"></script>
 </body>
 </html>
