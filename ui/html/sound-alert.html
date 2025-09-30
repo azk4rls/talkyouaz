@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peringatan Suara - Talkyou</title>
+    
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/sound-alert.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="layout-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>Talkyou</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/peringatan-suara" class="nav-link active"><i class="fas fa-bell"></i> Peringatan Suara</a></li>
+                <li><a href="/riwayat" class="nav-link"><i class="fas fa-history"></i> Riwayat</a></li>
+                <li><a href="/profil" class="nav-link"><i class="fas fa-user-cog"></i> Profil & Pengaturan</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="logout-button" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Peringatan Suara</h1>
+                <p>Aktifkan untuk mendapatkan notifikasi visual dari suara di sekitar Anda.</p>
+            </header>
+
+            <div class="sound-alert-container">
+                <div class="controls">
+                    <button id="start-listen-btn">
+                        <i class="fas fa-play-circle"></i> Mulai Mendengarkan
+                    </button>
+                    <div id="status" class="status-box status-idle">
+                        Status: Tidak Aktif
+                    </div>
+                </div>
+
+                <div class="options">
+                    <h3>Aktifkan Peringatan Untuk:</h3>
+                    <div class="option-item">
+                        <label for="alert-clap">Tepuk Tangan / Ketukan</label>
+                        <label class="switch">
+                            <input type="checkbox" id="alert-clap" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                     <div class="option-item">
+                        <label for="alert-speech">Suara Bicara</label>
+                        <label class="switch">
+                            <input type="checkbox" id="alert-speech" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="alert-overlay" class="alert-overlay">
+        <div class="alert-content">
+            <div id="alert-icon" class="alert-icon"></div>
+            <h2 id="alert-text"></h2>
+        </div>
+    </div>
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
+    <script src="/static/js/sound-alert.js"></script>
+</body>
+</html>

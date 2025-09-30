@@ -76,7 +76,7 @@ func main() {
 	r.Get("/frasa-cepat", pageHandler.ShowPhrasesPage)
 	r.Get("/riwayat", pageHandler.ShowHistoryPage)
 	r.Get("/profil", pageHandler.ShowProfilePage)
-	// r.Get("/pengaturan", pageHandler.ShowPengaturanPage)
+	r.Get("/peringatan-suara", pageHandler.ShowSoundAlertPage)
 
 	r.Group(func(r chi.Router) {
 	r.Use(appMiddleware.JWTMiddleware)
@@ -107,6 +107,7 @@ func main() {
 		r.Get("/", userHandler.GetMyProfile)
 		r.Put("/", userHandler.UpdateProfile) // <-- PASTIKAN BARIS INI ADA
 		r.Put("/password", userHandler.UpdatePassword)
+		
 	})
 
 	// --- Static Files ---
