@@ -42,7 +42,13 @@ func (h *PageHandler) ShowSoundAlertPage(w http.ResponseWriter, r *http.Request)
     }
     http.ServeFile(w, r, path)
 }
+func (h *PageHandler) ShowLearningCenterPage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./ui/html/learning-center.html")
+}
 
+func (h *PageHandler) ShowBodyLanguagePage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./ui/html/body-language.html")
+}
 // func (h *PageHandler) ShowPengaturanPage(w http.ResponseWriter, r *http.Request) {
 // 	http.ServeFile(w, r, "./ui/html/pages/pengaturan.html")
 // }

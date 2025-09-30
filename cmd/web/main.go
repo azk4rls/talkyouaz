@@ -77,6 +77,8 @@ func main() {
 	r.Get("/riwayat", pageHandler.ShowHistoryPage)
 	r.Get("/profil", pageHandler.ShowProfilePage)
 	r.Get("/peringatan-suara", pageHandler.ShowSoundAlertPage)
+	r.Get("/belajar", pageHandler.ShowLearningCenterPage)
+	r.Get("/belajar/bahasa-tubuh", pageHandler.ShowBodyLanguagePage)
 
 	r.Group(func(r chi.Router) {
 	r.Use(appMiddleware.JWTMiddleware)

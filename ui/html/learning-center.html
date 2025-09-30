@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pusat Belajar - Talkyou</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/learning.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="layout-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>Talkyou</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/peringatan-suara" class="nav-link"><i class="fas fa-bell"></i> Peringatan Suara</a></li>
+                <li><a href="/riwayat" class="nav-link"><i class="fas fa-history"></i> Riwayat</a></li>
+                <li><a href="/profil" class="nav-link"><i class="fas fa-user-cog"></i> Profil & Pengaturan</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="logout-button" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Pusat Belajar</h1>
+                <p>Tingkatkan pemahaman dan kepercayaan diri Anda dalam berkomunikasi.</p>
+            </header>
+            <div class="feature-grid">
+                <a href="/belajar/bahasa-tubuh" class="feature-card">
+                    <div class="card-icon"><i class="fas fa-child"></i></div>
+                    <h2>Belajar Bahasa Tubuh</h2>
+                    <p>Pahami makna di balik gestur dan ekspresi wajah.</p>
+                </a>
+                <a href="#" class="feature-card disabled">
+                    <div class="card-icon"><i class="fas fa-sign-language"></i></div>
+                    <h2>Kamus Bahasa Isyarat</h2>
+                    <p>Fitur ini akan segera hadir.</p>
+                </a>
+            </div>
+        </main>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutButton = document.getElementById('logout-button');
+            if(logoutButton) {
+                logoutButton.addEventListener('click', () => {
+                    localStorage.removeItem('authToken');
+                    alert('Anda telah logout.');
+                    window.location.href = '/';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

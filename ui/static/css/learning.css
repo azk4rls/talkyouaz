@@ -1,0 +1,48 @@
+/* Styling untuk kartu di halaman hub belajar sama dengan di dashboard */
+/* jadi tidak perlu styling tambahan untuk learning-center.html */
+
+.learning-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+.learning-card {
+    background-color: #fff;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.learning-card-gif {
+    width: 100%;
+    height: 200px;
+    background-color: #e9ecef;
+    object-fit: cover;
+}
+
+.learning-card-content {
+    padding: 20px;
+}
+
+.learning-card-content h3 {
+    margin-top: 0;
+    font-size: 1.3rem;
+}
+
+.learning-card-content p {
+    margin-bottom: 0;
+    color: var(--light-text-color);
+}
+
+.feature-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+.feature-card.disabled:hover {
+    transform: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
