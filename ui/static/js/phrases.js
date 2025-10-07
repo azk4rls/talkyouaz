@@ -5,6 +5,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // --- Logika Logout ---
+    const logoutButton = document.getElementById('logout-button');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('authToken');
+            alert('Anda telah logout.');
+            window.location.href = '/';
+        });
+    }
+
     const addForm = document.getElementById('add-phrase-form');
     const textInput = document.getElementById('phrase-text');
     const phraseList = document.getElementById('phrase-list');
