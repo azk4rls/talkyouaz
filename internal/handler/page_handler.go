@@ -49,6 +49,16 @@ func (h *PageHandler) ShowLearningCenterPage(w http.ResponseWriter, r *http.Requ
 func (h *PageHandler) ShowBodyLanguagePage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./ui/html/body-language.html")
 }
-// func (h *PageHandler) ShowPengaturanPage(w http.ResponseWriter, r *http.Request) {
-// 	http.ServeFile(w, r, "./ui/html/pages/pengaturan.html")
-// }
+
+func (h *PageHandler) ShowBasicSignsPage(w http.ResponseWriter, r *http.Request) {
+	path := "./ui/html/basic-signs.html"
+	log.Println("Load file:", path)
+	if _, err := os.Stat(path); err != nil {
+		log.Println("File error:", err)
+	}
+	http.ServeFile(w, r, path)
+}
+
+func (h *PageHandler) ShowSignLanguagePage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./ui/html/basic-signs.html")
+}

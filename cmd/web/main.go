@@ -77,14 +77,18 @@ func main() {
 	r.Get("/riwayat", pageHandler.ShowHistoryPage)
 	r.Get("/profil", pageHandler.ShowProfilePage)
 	r.Get("/peringatan-suara", pageHandler.ShowSoundAlertPage)
-	r.Get("/belajar", pageHandler.ShowLearningCenterPage)
+	
+	// --- Halaman Belajar (lebih spesifik dulu) ---
 	r.Get("/belajar/bahasa-tubuh", pageHandler.ShowBodyLanguagePage)
+	r.Get("/belajar/isyarat-dasar", pageHandler.ShowBasicSignsPage)
+	r.Get("/belajar/kamus", pageHandler.ShowSignLanguagePage)
+	r.Get("/belajar", pageHandler.ShowLearningCenterPage)
 
 	r.Group(func(r chi.Router) {
-	r.Use(appMiddleware.JWTMiddleware)
-    r.Get("/api/v1/conversations", conversationHandler.GetAllConversations)
-    r.Post("/api/v1/conversations", conversationHandler.SaveConversation)
-    r.Delete("/api/v1/conversations/{id}", conversationHandler.DeleteConversation)
+		r.Use(appMiddleware.JWTMiddleware)
+		r.Get("/api/v1/conversations", conversationHandler.GetAllConversations)
+		r.Post("/api/v1/conversations", conversationHandler.SaveConversation)
+		r.Delete("/api/v1/conversations/{id}", conversationHandler.DeleteConversation)
 	})
 
 
@@ -116,9 +120,9 @@ func main() {
 	fs := http.FileServer(http.Dir("./ui/static"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
 
-	// --- Catch-All ke Frontend ---
+	// --- Catch-All ke Frontend (harus di paling bawah) ---
 	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./ui/html/index.html")
+		http.ServeFile(w, r, "./ui/html/auth.html")
 	})
 
 	// ================== START SERVER ==================
