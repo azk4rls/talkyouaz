@@ -65,6 +65,7 @@ func main() {
 	userHandler := &handler.UserHandler{DB: db}
 	pageHandler := &handler.PageHandler{}
 	conversationHandler := &handler.ConversationHandler{DB: db}
+	phraseHandler := &handler.PhraseHandler{DB: db}
 
 	// ================== ROUTES ==================
 
@@ -94,27 +95,37 @@ func main() {
 
 
 	// --- API Publik: Auth ---
+	// --- API Publik: Auth ---
 	r.Route("/api/v1/auth", func(r chi.Router) {
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
 		r.Post("/verify", authHandler.Verify)
-
-		// OAuth Google
 		r.Get("/google/login", authHandler.GoogleLogin)
 		r.Get("/google/callback", authHandler.GoogleCallback)
-
-		// OAuth Facebook
 		r.Get("/facebook/login", authHandler.FacebookLogin)
 		r.Get("/facebook/callback", authHandler.FacebookCallback)
 	})
 
-	// --- API Terproteksi: User ---
+	// --- API Terproteksi ---
 	r.Route("/api/v1/me", func(r chi.Router) {
 		r.Use(appMiddleware.JWTMiddleware)
 		r.Get("/", userHandler.GetMyProfile)
-		r.Put("/", userHandler.UpdateProfile) // <-- PASTIKAN BARIS INI ADA
+		r.Put("/", userHandler.UpdateProfile)
 		r.Put("/password", userHandler.UpdatePassword)
-		
+	})
+	
+	r.Route("/api/v1/phrases", func(r chi.Router) {
+		r.Use(appMiddleware.JWTMiddleware)
+		r.Get("/", phraseHandler.GetAllPhrases)
+		r.Post("/", phraseHandler.CreatePhrase)
+		r.Delete("/{id}", phraseHandler.DeletePhrase)
+	})
+
+	r.Route("/api/v1/conversations", func(r chi.Router) {
+		r.Use(appMiddleware.JWTMiddleware)
+		r.Get("/", conversationHandler.GetAllConversations)
+		r.Post("/", conversationHandler.SaveConversation)
+		r.Delete("/{id}", conversationHandler.DeleteConversation)
 	})
 
 	// --- Static Files ---
@@ -122,9 +133,9 @@ func main() {
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
 
 	// --- Catch-All ke Frontend (harus di paling bawah) ---
-	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./ui/html/auth.html")
-	})
+	// r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+	// 	http.ServeFile(w, r, "./ui/html/auth.html")
+	// })
 
 	// ================== START SERVER ==================
 	port := os.Getenv("PORT")

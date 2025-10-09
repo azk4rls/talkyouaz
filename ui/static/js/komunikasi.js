@@ -32,17 +32,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Cek dukungan browser untuk Speech Recognition
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        if(listenBtn) {
-            listenBtn.disabled = true;
-            listenBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Browser Tidak Mendukung';
-        }
-    }
     const recognition = SpeechRecognition ? new SpeechRecognition() : null;
     if (recognition) {
         recognition.continuous = false;
         recognition.lang = 'id-ID';
         recognition.interimResults = false;
+    } else {
+        if(listenBtn) {
+            listenBtn.disabled = true;
+            listenBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Browser Tidak Mendukung';
+        }
     }
 
     // --- FUNGSI BANTUAN ---
@@ -117,22 +116,52 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Logika Tombol Simpan
     if (saveBtn) {
         saveBtn.addEventListener('click', async () => {
-            // ... (logika saveBtn Anda yang sudah benar)
+            const entries = transcriptArea.querySelectorAll('.transcript-entry');
+            if (entries.length === 0) {
+                alert('Tidak ada percakapan untuk disimpan.');
+                return;
+            }
+            let fullTranscript = [];
+            entries.forEach(entry => {
+                const prefix = entry.classList.contains('user') ? 'Saya: ' : 'Lawan Bicara: ';
+                fullTranscript.push(prefix + entry.textContent);
+            });
+            const response = await fetch('/api/v1/conversations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ transcript: fullTranscript.join('\n') })
+            });
+            if (response.ok) {
+                alert('Percakapan berhasil disimpan!');
+                transcriptArea.innerHTML = '';
+            } else {
+                alert('Gagal menyimpan percakapan.');
+            }
         });
     }
 
     // 4. Logika Frasa Cepat
     const fetchPhrases = async () => {
         try {
+            // PERBAIKAN: Tambahkan header Authorization di sini
             const response = await fetch('/api/v1/phrases', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
-            if (!response.ok) return;
+            if (!response.ok) {
+                console.error("Gagal mengambil data frasa dari server.");
+                return;
+            };
             savedPhrases = await response.json();
         } catch (e) {
-            console.error("Gagal mengambil frasa:", e);
+            console.error("Error saat fetch frasa:", e);
         }
     };
+
     if (showPhrasesBtn) {
         showPhrasesBtn.addEventListener('click', () => {
             modalPhraseList.innerHTML = '';
@@ -149,11 +178,13 @@ document.addEventListener('DOMContentLoaded', () => {
             phrasesModal.style.display = 'flex';
         });
     }
+
     const hideModal = () => { if (phrasesModal) phrasesModal.style.display = 'none'; };
     if (closeModalBtn) closeModalBtn.addEventListener('click', hideModal);
     if (phrasesModal) phrasesModal.addEventListener('click', (e) => {
         if (e.target === phrasesModal) hideModal();
     });
+
     if (modalPhraseList) {
         modalPhraseList.addEventListener('click', (e) => {
             if (e.target.tagName === 'LI' && e.target.dataset.text) {
