@@ -77,11 +77,12 @@ func main() {
 	r.Get("/riwayat", pageHandler.ShowHistoryPage)
 	r.Get("/profil", pageHandler.ShowProfilePage)
 	r.Get("/peringatan-suara", pageHandler.ShowSoundAlertPage)
+	r.Get("/transkrip-live", pageHandler.ShowLiveTranscriptPage)
 	
 	// --- Halaman Belajar (lebih spesifik dulu) ---
 	r.Get("/belajar/bahasa-tubuh", pageHandler.ShowBodyLanguagePage)
 	r.Get("/belajar/isyarat-dasar", pageHandler.ShowBasicSignsPage)
-	r.Get("/belajar/kamus", pageHandler.ShowSignLanguagePage)
+	// r.Get("/belajar/kamus", pageHandler.ShowSignLanguagePage)
 	r.Get("/belajar", pageHandler.ShowLearningCenterPage)
 
 	r.Group(func(r chi.Router) {

@@ -62,3 +62,7 @@ func (h *PageHandler) ShowBasicSignsPage(w http.ResponseWriter, r *http.Request)
 func (h *PageHandler) ShowSignLanguagePage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./ui/html/basic-signs.html")
 }
+
+func (h *PageHandler) ShowLiveTranscriptPage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./ui/html/live-transcript.html")
+}

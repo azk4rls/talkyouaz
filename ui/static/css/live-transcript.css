@@ -1,0 +1,49 @@
+.transcript-live-container {
+    background-color: #212529;
+    color: #f8f9fa;
+    border-radius: 12px;
+    height: calc(100vh - 180px);
+    max-height: 700px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.live-transcript-display {
+    flex-grow: 1;
+    padding: 30px;
+    font-size: 1.8rem;
+    line-height: 1.6;
+    overflow-y: auto;
+}
+
+.live-transcript-display .placeholder {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.live-controls {
+    background-color: #343a40;
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid #495057;
+}
+
+#toggle-listen-btn {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: 500;
+    border-radius: 50px;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.2s;
+}
+
+#toggle-listen-btn.listening {
+    background-color: #dc3545; /* Merah saat aktif */
+}
