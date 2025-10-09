@@ -39,24 +39,33 @@
             </header>
 
             <div class="komunikasi-container">
-                <div id="transcript-area" class="transcript-area">
-                    </div>
-        
+                <div id="transcript-area" class="transcript-area"></div>
                 <div class="status-bar">
                     <div id="status-indicator" class="status-idle"></div>
                     <span id="status-text">Siap</span>
                 </div>
-        
                 <div class="controls-area">
                     <textarea id="user-text-input" placeholder="Ketik pesan Anda di sini..."></textarea>
                     <div class="button-group">
+                        <button id="show-phrases-btn" class="action-btn phrase-btn"><i class="fas fa-star"></i> Frasa Cepat</button>
                         <button id="speak-btn" class="action-btn"><i class="fas fa-volume-up"></i> Ucapkan</button>
                         <button id="listen-btn" class="action-btn"><i class="fas fa-microphone"></i> Mendengar</button>
-                        <button id="save-btn" class="action-btn save"><i class="fas fa-save"></i> Simpan</button>
                     </div>
+                     <button id="save-btn" class="action-btn save-btn"><i class="fas fa-save"></i> Simpan Percakapan</button>
                 </div>
             </div>
         </main>
+    </div>
+
+    <div id="phrases-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Pilih Frasa Cepat</h2>
+                <button id="close-modal-btn" class="close-modal">&times;</button>
+            </div>
+            <ul id="modal-phrase-list" class="modal-phrase-list">
+                </ul>
+        </div>
     </div>
 
     <script src="/static/js/komunikasi.js"></script>
