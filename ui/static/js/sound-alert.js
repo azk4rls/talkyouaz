@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Keamanan dasar & inisialisasi elemen
+    // Keamanan dasar & logout
     const token = localStorage.getItem('authToken');
     if (!token) {
         window.location.href = '/';
@@ -33,10 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
         let iconClass = 'fas fa-question-circle';
         let text = label;
 
-        if (label.includes('Tepuk') || label.includes('Ketukan')) {
-            iconClass = 'fas fa-sign-language';
+        if (label.toLowerCase().includes('clap')) {
+            iconClass = 'fas fa-hands-clapping';
             text = 'Tepukan / Ketukan Terdeteksi';
-        } else if (label.includes('Bicara')) {
+        } else if (label.toLowerCase().includes('speech')) {
             iconClass = 'fas fa-comment-dots';
             text = 'Suara Bicara Terdeteksi';
         }
@@ -53,19 +53,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fungsi utama untuk inisialisasi dan mendengarkan
     async function listen() {
         if (recognizer && recognizer.isListening()) {
-            recognizer.stopListening();
+            await recognizer.stopListening();
             statusBox.textContent = 'Status: Tidak Aktif';
             statusBox.className = 'status-box status-idle';
             startBtn.innerHTML = '<i class="fas fa-play-circle"></i> Mulai Mendengarkan';
-            recognizer = null;
             return;
         }
 
         try {
             statusBox.textContent = 'Status: Memuat model...';
             
-            // Pakai bawaan TensorFlow.js (otomatis load model & metadata)
+            // Membuat instance recognizer
             recognizer = speechCommands.create('BROWSER_FFT');
+            
+            // Pastikan model dimuat
             await recognizer.ensureModelLoaded();
 
             statusBox.textContent = 'Status: Aktif Mendengarkan...';
@@ -74,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const words = recognizer.wordLabels();
             
+            // Mulai mendengarkan prediksi
             recognizer.listen(result => {
                 let maxScore = -1;
                 let detectedWord = null;
@@ -85,27 +87,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
+                // Cek apakah suara yang terdeteksi ingin dinotifikasi
                 if (detectedWord && detectedWord !== '_background_noise_') {
-                    if (detectedWord === 'clap' && toggles.clap.checked) {
-                        showVisualAlert('Tepuk Tangan');
-                    } else if (detectedWord === 'speech' && toggles.speech.checked) {
-                        showVisualAlert('Suara Bicara');
+                    console.log(`Detected: ${detectedWord} (Score: ${maxScore.toFixed(2)})`);
+
+                    if (detectedWord.toLowerCase().includes('clap') && toggles.clap.checked) {
+                        showVisualAlert(detectedWord);
+                    } else if (detectedWord.toLowerCase().includes('speech') && toggles.speech.checked) {
+                        showVisualAlert(detectedWord);
                     }
                 }
-
             }, {
-                includeSpectrogram: true,
-                probabilityThreshold: 0.90
+                includeSpectrogram: false,
+                probabilityThreshold: 0.90, // Tingkat kepercayaan (0-1)
+                invokeCallbackOnNoiseAndUnknown: false
             });
 
         } catch (error) {
             console.error(error);
-            statusBox.textContent = 'Error: Gagal memulai';
+            statusBox.textContent = 'Error: Gagal memulai. Cek izin mikrofon.';
             statusBox.className = 'status-box status-error';
+            alert('Gagal memulai fitur Peringatan Suara. Pastikan Anda telah memberikan izin akses mikrofon untuk situs ini.');
         }
     }
 
-    if(startBtn) {
+    if (startBtn) {
         startBtn.addEventListener('click', listen);
     }
 });
