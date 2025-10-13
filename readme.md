@@ -1,6 +1,6 @@
 
 **TalkYou** adalah aplikasi pembantu untuk Deaafness, Muteness, Blindness
-
+NEXT UPDATE UI 16 OKT 2025
 ---
 
 ## 🚀 Fitur Utama
@@ -34,7 +34,6 @@ tau sendiri lah y
    git clone https://github.com/username/nama-project.git
    cd nama-project
 
-#################################################
 Jalankan database migrations:
 go run cmd/migrate.go
 
