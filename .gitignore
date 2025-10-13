@@ -1,4 +1,27 @@
-# Environment variables
-.env
+# OS
+.DS_Store
+Thumbs.db
 
-/migrations
+# Env & sensitive files
+.env
+*.env
+
+# Go build & cache
+*.exe
+*.out
+*.dll
+*.test
+bin/
+dist/
+tmp/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Node/Frontend
+node_modules/
+build/
